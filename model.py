@@ -1,7 +1,8 @@
 import csv
+import numpy
 
 class Model:
-    def _get_route(_self, route_file):
+    def _read_route(_self, route_file):
         route = []
         with open(route_file, 'r') as route_data:
             reader = csv.reader(route_data, delimiter=',')
@@ -16,21 +17,17 @@ class Model:
                 })
         return route
 
-    def _get_sun(_self, sun_file):
-        sun = []
-        with open(sun_file, 'r') as file:
-            for row in  csv.reader(file, delimiter=','):
-                sun.append(float(value.strip()) for value in row)
-        return sun
+    def _read_sun(_self, sun_file):
+        return numpy.loadtxt(sun_file, delimiter=',')
 
-    def _get_wind(_self, wind_file):
-        sun = []
-        with open(wind_file, 'r') as file:
-            for row in csv.reader(file, delimiter=','):
-                sun.append(float(value.strip()) for value in row)
-        return sun
+    def _read_wind(_self, wind_file):
+        return numpy.loadtxt(wind_file, delimiter=',')
+
+    def get_route_at_km(self, km):
+        rounded_km = int(km)
+        return self.route[rounded_km]
 
     def __init__(self, route_file='route_data.csv', wind_file='interpolated_data/wndgust10m_interp.csv', sun_file='interpolated_data/av_swsfcdown_interp.csv'):
-        self.route = self._get_route(route_file)
-        self.wind = self._get_wind(wind_file)
-        self.sun = self._get_sun(sun_file)
+        self.route = self._read_route(route_file)
+        self.wind = self._read_wind(wind_file)
+        self.sun = self._read_sun(sun_file)
