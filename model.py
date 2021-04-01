@@ -30,12 +30,14 @@ class Model:
             year, month, day = date_str[:4], date_str[4:6], date_str[6:8]
             hour = time.readline().strip()
             iso_datetime = "{}-{}-{}Z{:0>2}:00:00".format(year, month, day, hour)
-            gmt_datetime = datetime.fromisoformat(iso_datetime)
-            print(gmt_datetime)
+            gmt_datetime = datetime.fromisoformat(iso_datetime).replace(tzinfo=pytz.timezone('Australia/Darwin'))
+            return gmt_datetime
 
-    def get_route_at_km(self, km):
-        rounded_km = int(km)
-        return self.route[rounded_km]
+    def distance_to_index(_self, distance):
+        return int(distance)
+
+    def datetime_to_index(self, time):
+        return int((time - self.start_datetime).total_seconds() / 60 / 15)
 
     def __init__(self,
             route_file='route_data.csv',

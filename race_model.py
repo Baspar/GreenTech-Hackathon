@@ -1,7 +1,9 @@
+import datetime from datetime
+
 class RaceModel:
     def __init__(self, model):
         self.model = model
-        self.current_time = 0.0
+        self.current_time = model.start_datetime
         self.current_km = 0.0
         self.current_battery = 5000.0
 
