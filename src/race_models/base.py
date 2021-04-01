@@ -11,23 +11,35 @@ class BaseModel:
         route_segment_index = self.model.distance_to_index(self.current_km)
         return self.model.route[route_segment_index]
 
-    def _get_current_sun(self):
+    def get_current_sun(self):
         return self.model.sun[
                 self.model.distance_to_index(self.current_km),
                 self.model.datetime_to_index(self.current_time)
                 ]
 
-    def _get_current_wind(self):
+    def get_current_wind(self):
         return self.model.wind[
                 self.model.distance_to_index(self.current_km),
                 self.model.datetime_to_index(self.current_time)
                 ]
 
     def _get_production_for(self, speed, distance, time):
-        return self._get_current_sun() * time * 0.8
+        return 3.6 * self.get_current_sun() * time * 0.8
 
-    def _get_consumption_for(self, speed, di,tance, time):
-        return 200
+    def _get_consumption_for(self, speed, distance, time):
+        route_segment = self.get_current_route_segment()
+
+        current_wind = self.get_current_wind()
+        f_drag = 0.1 * 1.1644 * (current_wind + speed * 5 / 18) ** 2 / 2
+
+        f_rolling = 250 * 9.81 * 0.01
+
+        height_change_for_distance = route_segment['height_change'] / distance
+        f_grav = 250 * 9.81 * height_change_for_distance / distance / 1000
+
+        ext_force = f_drag + f_rolling + f_grav
+
+        return ext_force * distance / 0.95
 
     def move(self, speed):
         minutes_to_next_km = (int(self.current_km + 1) - self.current_km) / speed * 60
@@ -40,6 +52,7 @@ class BaseModel:
         consumption = self._get_consumption_for(speed, distance, time)
         production = self._get_production_for(speed, distance, time)
 
+        print("c{} p{}".format(consumption, production))
         self.current_battery += (production - consumption)
         self.current_km += distance
         self.current_time += timedelta(hours=time)
