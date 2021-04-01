@@ -7,10 +7,26 @@ class BaseModel:
         self.current_km = 0.0
         self.current_battery = 5000.0
 
-    def _get_production_for(self, speed, distance, time):
-        return 0
+    def get_current_route_segment(self):
+        route_segment_index = self.model.distance_to_index(self.current_km)
+        return self.model.route[route_segment_index]
 
-    def _get_consumption_for(self, speed, distance, time):
+    def _get_current_sun(self):
+        return self.model.sun[
+                self.model.distance_to_index(self.current_km),
+                self.model.datetime_to_index(self.current_time)
+                ]
+
+    def _get_current_wind(self):
+        return self.model.wind[
+                self.model.distance_to_index(self.current_km),
+                self.model.datetime_to_index(self.current_time)
+                ]
+
+    def _get_production_for(self, speed, distance, time):
+        return self._get_current_sun() * time * 0.8
+
+    def _get_consumption_for(self, speed, di,tance, time):
         return 200
 
     def move(self, speed):
@@ -29,10 +45,6 @@ class BaseModel:
         self.current_time += timedelta(hours=time)
 
         print("Moving {}km, at {}km/h. Battery={}, current_distance={}, current_time={}".format(distance, speed, self.current_battery, self.current_km, self.current_time))
-
-    def get_current_route_segment(self):
-        route_segment_index = self.model.distance_to_index(self.current_km)
-        return self.model.route[route_segment_index]
 
     def step(self):
         raise Exception("Please reimplement this step method")
