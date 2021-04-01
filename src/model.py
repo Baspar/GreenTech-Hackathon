@@ -2,6 +2,7 @@ import csv
 import pathlib
 import numpy
 from datetime import datetime
+import pytz
 
 class Model:
     def _read_route(_self, route_file):
@@ -32,7 +33,8 @@ class Model:
             hour = time.readline().strip()
             iso_datetime = "{}-{}-{}Z{:0>2}:00:00".format(year, month, day, hour)
             gmt_datetime = datetime.fromisoformat(iso_datetime)
-            return gmt_datetime
+            offset = pytz.timezone("Australia/darwin").utcoffset(datetime.now())
+            return gmt_datetime + offset
 
     def distance_to_index(_self, distance):
         return int(distance)
