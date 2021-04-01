@@ -30,5 +30,9 @@ class BaseModel:
 
         print("Moving {}km, at {}km/h. Battery={}, current_distance={}, current_time={}".format(distance, speed, self.current_battery, self.current_km, self.current_time))
 
+    def get_current_route_segment(self):
+        route_segment_index = self.model.distance_to_index(self.current_km)
+        return self.model.route[route_segment_index]
+
     def step(self):
         raise Exception("Please reimplement this step method")
