@@ -23,8 +23,10 @@ class Model:
     def _read_sun(_self, sun_file):
         return numpy.loadtxt(sun_file, delimiter=',')
 
-    def _read_wind(_self, wind_file):
-        return numpy.loadtxt(wind_file, delimiter=',')
+    def _read_wind(_self, wind_zonal_file, wind_meridional_file):
+        zonal_file = numpy.loadtxt(wind_zonal_file, delimiter=',')
+        meridional_file = numpy.loadtxt(wind_meridional_file, delimiter=',')
+        return numpy.dstack((zonal_file, meridional_file))
 
     def _read_datetime(_self, date_file, time_file):
         with open(date_file, 'r') as date, open(time_file, 'r') as time:
@@ -44,12 +46,13 @@ class Model:
 
     def __init__(self,
             route_file='route_data.csv',
-            wind_file='interpolated_data/wndgust10m_interp.csv',
+            wind_zonal_file='interpolated_data/av10u_interp.csv',
+            wind_meridional_file='interpolated_data/av10v_interp.csv',
             sun_file='interpolated_data/av_swsfcdown_interp.csv',
             date_file='interpolated_data/base_date_interp.csv',
             time_file='interpolated_data/base_time_interp.csv'):
         root_path = pathlib.Path(__file__).parent.parent
         self.route = self._read_route("{}/{}".format(root_path, route_file))
-        self.wind = self._read_wind("{}/{}".format(root_path, wind_file))
+        self.wind = self._read_wind("{}/{}".format(root_path, wind_zonal_file), "{}/{}".format(root_path, wind_meridional_file))
         self.sun = self._read_sun("{}/{}".format(root_path, sun_file))
         self.start_datetime = self._read_datetime("{}/{}".format(root_path, date_file), "{}/{}".format(root_path, time_file))

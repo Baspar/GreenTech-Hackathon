@@ -1,4 +1,6 @@
+from math import pi, cos, sin
 from datetime import timedelta
+import numpy
 
 class BaseModel:
     def __init__(self, model):
@@ -30,8 +32,11 @@ class BaseModel:
     def _get_consumption_for(self, speed, distance, time):
         route_segment = self.get_current_route_segment()
 
-        current_wind = self.get_current_wind()
-        f_drag = 0.1 * 1.1644 * (current_wind + speed * 5 / 18) ** 2 / 2
+        (zonal_wind, meridional_wind) = self.get_current_wind()
+        theta = -2 * pi * route_segment['angle'] / 360
+        rot_matrix = numpy.array([[cos(theta), -sin(theta)], [sin(theta), cos(theta)]])
+        wind_projection = numpy.dot(rot_matrix, [zonal_wind, meridional_wind])[0]
+        f_drag = 0.1 * 1.1644 * (wind_projection - speed * 5 / 18) ** 2 / 2
 
         f_rolling = 250 * 9.81 * 0.01
 
