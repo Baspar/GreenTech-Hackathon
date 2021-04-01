@@ -1,5 +1,3 @@
-import datetime from datetime
-
 class RaceModel:
     def __init__(self, model):
         self.model = model
