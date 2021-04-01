@@ -1,4 +1,5 @@
 import csv
+import pathlib
 import numpy
 from datetime import datetime
 
@@ -40,12 +41,13 @@ class Model:
         return int((time - self.start_datetime).total_seconds() / 60 / 15)
 
     def __init__(self,
-            route_file='../route_data.csv',
-            wind_file='../interpolated_data/wndgust10m_interp.csv',
-            sun_file='../interpolated_data/av_swsfcdown_interp.csv',
-            date_file='../interpolated_data/base_date_interp.csv',
-            time_file='../interpolated_data/base_time_interp.csv'):
-        self.route = self._read_route(route_file)
-        self.wind = self._read_wind(wind_file)
-        self.sun = self._read_sun(sun_file)
-        self.start_datetime = self._read_datetime(date_file, time_file)
+            route_file='route_data.csv',
+            wind_file='interpolated_data/wndgust10m_interp.csv',
+            sun_file='interpolated_data/av_swsfcdown_interp.csv',
+            date_file='interpolated_data/base_date_interp.csv',
+            time_file='interpolated_data/base_time_interp.csv'):
+        root_path = pathlib.Path(__file__).parent.parent
+        self.route = self._read_route("{}/{}".format(root_path, route_file))
+        self.wind = self._read_wind("{}/{}".format(root_path, wind_file))
+        self.sun = self._read_sun("{}/{}".format(root_path, sun_file))
+        self.start_datetime = self._read_datetime("{}/{}".format(root_path, date_file), "{}/{}".format(root_path, time_file))
