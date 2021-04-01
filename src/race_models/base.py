@@ -57,6 +57,11 @@ class BaseModel:
 
         print("Resting until {}. Battery={:.4f} (Δ{: .4f}), current_distance={:.4f}, current_time={}\n\n".format(time, self.current_battery, total_sun, self.current_km, self.current_time))
 
+        if not 8 <= self.current_time.hour < 17:
+            current_time = self.current_time
+            tommorow_morning = (current_time + timedelta(days=1)).replace(hour=8, minute=0, second=0, microsecond=0)
+            self.rest_until(tommorow_morning)
+
     def move(self, speed):
         minutes_to_next_km = (int(self.current_km + 1) - self.current_km) / speed * 60
         current_quarter = (self.current_time - self.model.start_datetime).total_seconds() / 60 / 15
