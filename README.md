@@ -2,11 +2,16 @@
 
 ## Requirements
 - Python3
-- pipenv
-- pip3
+- pipenv or pip3
 
-## Usage
+## Usage with `pipenv`
 ```bash
 pipenv install
-pipenv run ./main.py
+pipenv run src/main.py
+```
+
+## Usage with `pip`
+```bash
+pip3 install numpy pytz
+python3 src/main.py
 ```
