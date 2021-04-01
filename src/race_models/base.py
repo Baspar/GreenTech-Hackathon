@@ -41,6 +41,17 @@ class BaseModel:
 
         return ext_force * distance / 0.95
 
+    def rest_until(self, time):
+        from_index = self.model.datetime_to_index(self.current_time)
+        to_index = self.model.datetime_to_index(time)
+        sun_at_this_location = self.model.sun[self.model.distance_to_index(self.current_km)]
+        total_sun = 3.6 * sun_at_this_location[from_index:to_index].sum() * 0.25 * 0.8
+        self.current_battery += total_sun
+        self.current_battery = min(5000.0, self.current_battery)
+        self.current_time = time
+
+        print("Resting until {}. Battery={:.4f} (Δ{: .4f}), current_distance={:.4f}, current_time={}\n\n".format(time, self.current_battery, total_sun, self.current_km, self.current_time))
+
     def move(self, speed):
         minutes_to_next_km = (int(self.current_km + 1) - self.current_km) / speed * 60
         current_quarter = (self.current_time - self.model.start_datetime).total_seconds() / 60 / 15
@@ -59,16 +70,13 @@ class BaseModel:
 
         print("Moving {:.4f}km, at {:.4f}km/h. Battery={:.4f} (Δ{: .4f}), current_distance={:.4f}, current_time={}".format(distance, speed, self.current_battery, production - consumption, self.current_km, self.current_time))
 
-    def rest_until(self, time):
-        from_index = self.model.datetime_to_index(self.current_time)
-        to_index = self.model.datetime_to_index(time)
-        sun_at_this_location = self.model.sun[self.model.distance_to_index(self.current_km)]
-        total_sun = 3.6 * sun_at_this_location[from_index:to_index].sum() * 0.25 * 0.8
-        self.current_battery += total_sun
-        self.current_battery = min(5000.0, self.current_battery)
-        self.current_time = time
+        if not 8 <= self.current_time.hour < 17:
+            current_time = self.current_time
+            tommorow_morning = (current_time + timedelta(days=1)).replace(hour=8, minute=0, second=0, microsecond=0)
+            self.rest_until(tommorow_morning)
+        elif self.get_current_route_segment()['has_control_stop']:
+            self.rest_until(self.current_time + timedelta(minutes=30))
 
-        print("\n\nResting until {}. Battery={:.4f} (Δ{: .4f}), current_distance={:.4f}, current_time={}".format(time, self.current_battery, total_sun, self.current_km, self.current_time))
 
     def step(self):
         raise Exception("Please reimplement this step method")
