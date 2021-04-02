@@ -1,5 +1,5 @@
 from math import pi, cos, sin
-from datetime import timedelta
+from datetime import timedelta, datetime
 import numpy
 from logger import logger
 
@@ -10,8 +10,11 @@ class BaseModel:
         self.current_time = model.start_datetime
         self.current_km = 0.0
         self.current_battery = 5000.0
+        real_start = datetime.fromisoformat('2019-10-13Z08:30:00')
+        self.real_start = real_start
         if not silent:
             print("\n\nStarting. Battery={}, current_distance={}, current_time={}".format(self.current_battery, self.current_km, self.current_time))
+        self.rest_until(real_start)
 
     def clone(self, silent=True):
         my_clone = BaseModel(self.model, silent=silent)
@@ -60,7 +63,7 @@ class BaseModel:
             return True
 
         if self.model.distance_to_index(self.current_km) >= len(self.model.route):
-            print("Race over in {}".format(self.current_time - self.model.start_datetime))
+            print("Race over in {}".format(self.current_time - self.real_start))
             return True
 
         return False

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import sys
+from datetime import datetime
 from model import Model
 import race_models
 

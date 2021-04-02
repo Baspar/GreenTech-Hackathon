@@ -21,7 +21,7 @@ class Model(BaseModel):
         is_afternoon = self.current_time.hour >= 15
         is_almost_over = (3027 - self.current_km) < 120
 
-        if is_afternoon or is_almost_over: 
+        if is_afternoon or is_almost_over:
             if self.use_bat_percentage == None:
                 self.use_bat_percentage = 0.75 * percentage_bat
 
