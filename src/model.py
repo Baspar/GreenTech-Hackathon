@@ -1,7 +1,7 @@
+from datetime import datetime
 import csv
 import pathlib
 import numpy
-from datetime import datetime
 import pytz
 
 class Model:
@@ -21,7 +21,7 @@ class Model:
         return route
 
     def _read_sun(_self, sun_file):
-        return numpy.loadtxt(sun_file, delimiter=',')
+        return numpy.clip(numpy.loadtxt(sun_file, delimiter=','), a_min=0, a_max=None)
 
     def _read_wind(_self, wind_zonal_file, wind_meridional_file):
         zonal_file = numpy.loadtxt(wind_zonal_file, delimiter=',')
