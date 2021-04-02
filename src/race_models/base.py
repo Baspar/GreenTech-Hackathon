@@ -1,6 +1,7 @@
 from math import pi, cos, sin
 from datetime import timedelta
 import numpy
+from logger import logger
 
 class BaseModel:
     def __init__(self, model):
@@ -29,7 +30,7 @@ class BaseModel:
     def _get_production_for(self, speed, distance, time):
         return 3.6 * self.get_current_sun() * time * 0.8
 
-    def _get_consumption_for(self, speed, distance, time):
+    def _get_ext_forces(self, speed, distance, time):
         route_segment = self.get_current_route_segment()
 
         (zonal_wind, meridional_wind) = self.get_current_wind()
@@ -42,9 +43,8 @@ class BaseModel:
 
         f_grav = 250 * 9.81 * route_segment['height_change'] / 1000
 
-        ext_force = f_drag + f_rolling + f_grav
+        return (f_drag, f_rolling, f_grav)
 
-        return ext_force * distance / 0.95
 
     def rest_until(self, time):
         from_index = self.model.datetime_to_index(self.current_time)
@@ -55,7 +55,7 @@ class BaseModel:
         self.current_battery = min(5000.0, self.current_battery)
         self.current_time = time
 
-        print("Resting until {}. Battery={:.4f} (Δ{: .4f}), current_distance={:.4f}, current_time={}\n\n".format(time, self.current_battery, total_sun, self.current_km, self.current_time))
+        logger('rest', self.current_time, 0, 0, self.current_battery, total_sun, (0, 0, 0), self.current_km)
 
         if not 8 <= self.current_time.hour < 17:
             current_time = self.current_time
@@ -70,15 +70,17 @@ class BaseModel:
         time = min(minutes_to_next_km, minutes_to_next_quarter) / 60
         distance = time * speed
 
-        consumption = self._get_consumption_for(speed, distance, time)
+        (f_drag, f_rolling, f_grav) = self._get_ext_forces(speed, distance, time)
+        consumption = (f_drag + f_rolling + f_grav) * distance / 0.95
         production = self._get_production_for(speed, distance, time)
+        delta = (production - consumption)
 
-        self.current_battery += (production - consumption)
-        self.current_battery = min(5000.0, self.current_battery)
+        self.current_battery = min(5000.0, self.current_battery + delta)
         self.current_km += distance
         self.current_time += timedelta(hours=time)
 
-        print("Moving {:.4f}km, at {:.4f}km/h. Battery={:.4f} (Δ{: .4f}), current_distance={:.4f}, current_time={}".format(distance, speed, self.current_battery, production - consumption, self.current_km, self.current_time))
+
+        logger('move', self.current_time, distance, speed, self.current_battery, delta, (f_drag, f_rolling, f_grav), self.current_km)
 
         if not 8 <= self.current_time.hour < 17:
             current_time = self.current_time

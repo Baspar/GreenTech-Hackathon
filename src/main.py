@@ -7,7 +7,8 @@ def main():
     race = RaceModel1(model)
 
     while race.current_km < len(model.route):
-        race.step()
+        if not race.step():
+            return
         if race.current_battery <= 0:
             print('Battery is empty')
             return
