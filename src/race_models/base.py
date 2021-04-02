@@ -45,6 +45,21 @@ class BaseModel:
 
         return (f_drag, f_rolling, f_grav)
 
+    def _check_for_end(self):
+        if self.model.datetime_to_index(self.current_time) >= len(self.model.sun[0]):
+            print("Err: no more weather data")
+            return True
+
+        if self.model.distance_to_index(self.current_km) >= len(self.model.route):
+            print("Race over")
+            return True
+
+        if self.current_battery <= 0:
+            print('Battery is empty')
+            return True
+
+        return False
+
 
     def rest_until(self, time):
         from_index = self.model.datetime_to_index(self.current_time)
@@ -55,12 +70,15 @@ class BaseModel:
         self.current_battery = min(5000.0, self.current_battery)
         self.current_time = time
 
-        logger('rest', self.current_time, 0, 0, self.current_battery, total_sun, (0, 0, 0), self.current_km)
+        logger('rest', self.current_time, 0, 0, self.current_battery, total_sun, total_sun, (0, 0, 0), self.current_km)
+
+        if self._check_for_end():
+            return True
 
         if not 8 <= self.current_time.hour < 17:
             current_time = self.current_time
             tommorow_morning = (current_time + timedelta(days=1)).replace(hour=8, minute=0, second=0, microsecond=0)
-            self.rest_until(tommorow_morning)
+            return self.rest_until(tommorow_morning)
 
     def move(self, speed):
         minutes_to_next_km = (int(self.current_km + 1) - self.current_km) / speed * 60
@@ -80,15 +98,17 @@ class BaseModel:
         self.current_time += timedelta(hours=time)
 
 
-        logger('move', self.current_time, distance, speed, self.current_battery, delta, (f_drag, f_rolling, f_grav), self.current_km)
+        logger('move', self.current_time, distance, speed, self.current_battery, delta, production, (f_drag, f_rolling, f_grav), self.current_km)
+
+        if self._check_for_end():
+            return True
 
         if not 8 <= self.current_time.hour < 17:
             current_time = self.current_time
             tommorow_morning = (current_time + timedelta(days=1)).replace(hour=8, minute=0, second=0, microsecond=0)
-            self.rest_until(tommorow_morning)
+            return self.rest_until(tommorow_morning)
         elif self.get_current_route_segment()['has_control_stop']:
-            self.rest_until(self.current_time + timedelta(minutes=30))
-
+            return self.rest_until(self.current_time + timedelta(minutes=30))
 
     def step(self):
         raise Exception("Please reimplement this step method")
