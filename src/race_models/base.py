@@ -51,7 +51,7 @@ class BaseModel:
             return True
 
         if self.model.distance_to_index(self.current_km) >= len(self.model.route):
-            print("Race over")
+            print("Race over in {}".format(self.current_time - self.model.start_datetime))
             return True
 
         if self.current_battery <= 0:
