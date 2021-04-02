@@ -79,7 +79,7 @@ class BaseModel:
         self.current_time = time
 
         if not self.silent:
-            logger('rest', self.current_time, 0, 0, self.current_battery, total_sun, total_sun, (0, 0, 0), self.current_km)
+            logger('rest', self.current_time, 0, 0, self.current_battery, total_sun, total_sun, (0, 0, 0), self.current_km, self.model.start_datetime)
 
         if self._check_for_end():
             return True
@@ -108,7 +108,7 @@ class BaseModel:
 
 
         if not self.silent:
-            logger('move', self.current_time, distance, speed, self.current_battery, delta, production, (f_drag, f_rolling, f_grav), self.current_km)
+            logger('move', self.current_time, distance, speed, self.current_battery, delta, production, (f_drag, f_rolling, f_grav), self.current_km, self.model.start_datetime)
 
         if self._check_for_end():
             return True
