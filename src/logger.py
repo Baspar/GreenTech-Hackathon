@@ -1,11 +1,7 @@
-CSV = False
-headers = False
+CSV = True
 
 def logger(action, datetime, distance_moved, speed, battery, delta, solar_production, ext_force, total_distance):
     (f_drag, f_rolling, f_grav) = ext_force
-    # if not headers:
-    #     headers = True
-    #     print('action, datetime, distance_moved, speed, battery, delta_battery, solar_production, f_drag, f_rolling, f_grav, current_km')
 
     if CSV:
         print('{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}'.format(action, datetime, distance_moved, speed, battery, delta, solar_production, f_drag, f_rolling, f_grav, total_distance))

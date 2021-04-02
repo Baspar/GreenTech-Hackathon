@@ -4,12 +4,21 @@ import numpy
 from logger import logger
 
 class BaseModel:
-    def __init__(self, model):
+    def __init__(self, model, silent=False):
+        self.silent = silent
         self.model = model
         self.current_time = model.start_datetime
         self.current_km = 0.0
         self.current_battery = 5000.0
-        print("\n\nStarting. Battery={}, current_distance={}, current_time={}".format(self.current_battery, self.current_km, self.current_time))
+        if not silent:
+            print("\n\nStarting. Battery={}, current_distance={}, current_time={}".format(self.current_battery, self.current_km, self.current_time))
+
+    def clone(self, silent=True):
+        my_clone = BaseModel(self.model, silent=silent)
+        my_clone.current_time = self.current_time
+        my_clone.current_time = self.current_time
+        self.current_km = 0.0
+        self.current_battery = 5000.0
 
     def get_current_route_segment(self):
         route_segment_index = self.model.distance_to_index(self.current_km)
@@ -54,10 +63,6 @@ class BaseModel:
             print("Race over in {}".format(self.current_time - self.model.start_datetime))
             return True
 
-        if self.current_battery <= 0:
-            print('Battery is empty')
-            return True
-
         return False
 
 
@@ -70,7 +75,8 @@ class BaseModel:
         self.current_battery = min(5000.0, self.current_battery)
         self.current_time = time
 
-        logger('rest', self.current_time, 0, 0, self.current_battery, total_sun, total_sun, (0, 0, 0), self.current_km)
+        if not self.silent:
+            logger('rest', self.current_time, 0, 0, self.current_battery, total_sun, total_sun, (0, 0, 0), self.current_km)
 
         if self._check_for_end():
             return True
@@ -98,7 +104,8 @@ class BaseModel:
         self.current_time += timedelta(hours=time)
 
 
-        logger('move', self.current_time, distance, speed, self.current_battery, delta, production, (f_drag, f_rolling, f_grav), self.current_km)
+        if not self.silent:
+            logger('move', self.current_time, distance, speed, self.current_battery, delta, production, (f_drag, f_rolling, f_grav), self.current_km)
 
         if self._check_for_end():
             return True
